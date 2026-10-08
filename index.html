@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aplikasi Ujian Online - Safe Exam Mode</title>
+  <!-- Google Fonts & FontAwesome Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cover-card {
+      background: #ffffff;
+      width: 90%;
+      max-width: 750px;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+      text-align: center;
+      position: relative;
+    }
+
+    .badge-safe {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: #e3f2fd;
+      color: #0d47a1;
+      padding: 6px 16px;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+    }
+
+    .cover-card h1 { color: #1a237e; font-size: 28px; margin-bottom: 5px; font-weight: 700; }
+    .cover-card p.subtitle { color: #5c6bc0; font-size: 15px; margin-top: 0; margin-bottom: 25px; }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+
+    .info-item {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      padding: 15px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .info-item i { font-size: 22px; color: #1e88e5; }
+    .info-item .text-group { display: flex; flex-direction: column; }
+    .info-item .title { font-size: 12px; color: #78909c; text-transform: uppercase; font-weight: 600; }
+    .info-item .value { font-size: 14px; color: #263238; font-weight: 600; }
+
+    .btn-start {
+      background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+      color: white;
+      border: none;
+      padding: 14px 40px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(21, 101, 192, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* BAR ATAS UJIAN */
+    .warning-bar {
+      background-color: #1a237e;
+      color: white;
+      height: 50px;
+      padding: 0 20px;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 9999;
+    }
+
+    .timer-box {
+      background-color: #ffc107;
+      color: #000;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .btn-finish {
+      background-color: #28a745 !important;
+      color: white !important;
+      border: none !important;
+      padding: 8px 16px !important;
+      border-radius: 20px !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      font-size: 13px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+    }
+
+    .btn-exit {
+      background-color: #dc3545 !important;
+      color: white !important;
+      border: none !important;
+      padding: 8px 16px !important;
+      border-radius: 20px !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      font-size: 13px !important;
+      display: none;
+      align-items: center !important;
+      gap: 6px !important;
+    }
+
+    #examArea {
+      display: none;
+      width: 100%;
+      height: 100vh;
+      padding-top: 50px;
+      box-sizing: border-box;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .system-msg {
+      background: white;
+      max-width: 600px;
+      margin: 100px auto;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<!-- SAMPUL HALAMAN DEPAN -->
+<div id="startArea" class="cover-card">
+  <div class="badge-safe">
+    <i class="fa-solid fa-shield-halved"></i> Safe Exam Active
+  </div>
+
+  <h1>APLIKASI UJIAN ONLINE</h1>
+  <p class="subtitle">(Google Forms + Countdown Timer)</p>
+
+  <div class="info-grid">
+    <div class="info-item">
+      <i class="fa-solid fa-clock"></i>
+      <div class="text-group">
+        <span class="title">Waktu Ujian</span>
+        <span class="value"><span id="examDurationText">120</span> Menit</span>
+      </div>
+    </div>
+
+    <div class="info-item">
+      <i class="fa-solid fa-expand"></i>
+      <div class="text-group">
+        <span class="title">Mode Layar</span>
+        <span class="value">Wajib Fullscreen</span>
+      </div>
+    </div>
+
+    <div class="info-item">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <div class="text-group">
+        <span class="title">Toleransi Kabur</span>
+        <span class="value">Maksimal 3 Kali</span>
+      </div>
+    </div>
+
+    <div class="info-item">
+      <i class="fa-solid fa-ban"></i>
+      <div class="text-group">
+        <span class="title">Akses Aplikasi</span>
+        <span class="value">Terkuasai/Terkunci</span>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-start" onclick="startExam()">
+    <i class="fa-solid fa-play"></i> Mulai Ujian Sekarang
+  </button>
+</div>
+
+<!-- LAYAR UTAMA UJIAN -->
+<div id="examArea">
+  <div class="warning-bar">
+    <div id="statusInfo">
+      <i class="fa-solid fa-triangle-exclamation" style="color: #ff4d4d; margin-right: 5px;"></i> 
+      Sisa Kesempatan: <strong id="violationCount" style="color: #ff4d4d;">3</strong>
+    </div>
+    
+    <div class="timer-box" id="timerBox">
+      <i class="fa-regular fa-clock"></i> Sisa Waktu: <span id="timerDisplay">00:00:00</span>
+    </div>
+
+    <!-- Tombol Bebas Pengawas / Matikan Keamanan -->
+    <button class="btn-finish" id="btnFinish" onclick="unlockExamForScore()">
+      <i class="fa-solid fa-circle-check"></i> Selesai & Lihat Skor
+    </button>
+
+    <!-- Tombol Keluar Akhir -->
+    <button class="btn-exit" id="btnExit" onclick="exitApplication()">
+      <i class="fa-solid fa-door-open"></i> Keluar Aplikasi
+    </button>
+  </div>
+
+  <!-- UBAH LINK GOOGLE FORM KAMU DI SINI (Ganti link panjang milikmu) -->
+  <iframe id="gformIframe" src="https://docs.google.com/forms/d/e/1FAIpQLSdrxfuGeK0utdIQoknmPQ6mSulI7k8rmG_vI1YROapXQDTPow/viewform?usp=header">
+    Memuat Google Form...
+  </iframe>
+</div>
+
+<script>
+  const examDurationInMinutes = 120; 
+
+  let violationsLeft = 3;
+  let isExamActive = false;
+  let totalSeconds = examDurationInMinutes * 60;
+  let timerInterval;
+
+  document.getElementById('examDurationText').innerText = examDurationInMinutes;
+
+  function startExam() {
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) {
+      elem.webkitRequestFullscreen();
+    }
+
+    document.getElementById('startArea').style.display = 'none';
+    document.getElementById('examArea').style.display = 'block';
+    
+    setTimeout(() => {
+      isExamActive = true;
+    }, 1000);
+
+    startTimer();
+  }
+
+  function startTimer() {
+    timerInterval = setInterval(function() {
+      if (totalSeconds <= 0) {
+        clearInterval(timerInterval);
+        timeUp();
+      } else {
+        totalSeconds--;
+        updateTimerDisplay();
+      }
+    }, 1000);
+  }
+
+  function updateTimerDisplay() {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    const pad = (num) => String(num).padStart(2, '0');
+    document.getElementById('timerDisplay').innerText = 
+      `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  }
+
+  function timeUp() {
+    isExamActive = false;
+    alert("Waktu pengerjaan ujian telah HABIS!");
+    unlockExamForScore();
+  }
+
+  // 1. Matikan proteksi saat klik "Selesai & Lihat Skor" tanpa menutup halaman
+  function unlockExamForScore() {
+    const confirmFinish = confirm("Apakah Anda sudah menekan tombol KIRIM pada Google Form?");
+    if (confirmFinish) {
+      isExamActive = false; // Sistem keamanan DIMATIKAN total
+      clearInterval(timerInterval);
+      
+      // Update tampilan bar navigasi
+      document.getElementById('statusInfo').innerHTML = `<span style="color: #28a745; font-weight: bold;"><i class="fa-solid fa-lock-open"></i> Mode Ujian Selesai</span>`;
+      document.getElementById('timerBox').style.display = 'none';
+      document.getElementById('btnFinish').style.display = 'none';
+      document.getElementById('btnExit').style.display = 'inline-flex';
+
+      alert("Sistem pengaman telah dimatikan.\nSilakan tekan tombol 'Lihat Skor' di Google Form untuk melihat nilai Anda.");
+    }
+  }
+
+  // 2. Tombol Keluar Aplikasi secara manual
+  function exitApplication() {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    }
+    location.reload();
+  }
+
+  function handleViolation(reason) {
+    if (!isExamActive) return;
+
+    violationsLeft--;
+    document.getElementById('violationCount').innerText = violationsLeft;
+
+    if (violationsLeft > 0) {
+      alert(`PERINGATAN! Anda terdeteksi ${reason}.\nSisa kesempatan: ${violationsLeft}`);
+    } else {
+      alert("Anda telah melebihi batas pelanggaran! Ujian dihentikan.");
+      forceLock();
+    }
+  }
+
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden && isExamActive) {
+      handleViolation("membuka tab baru atau meminimalisir browser");
+    }
+  });
+
+  document.addEventListener('fullscreenchange', function() {
+    if (!document.fullscreenElement && isExamActive) {
+      handleViolation("keluar dari mode Fullscreen");
+    }
+  });
+
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('copy', e => { if (isExamActive) e.preventDefault(); });
+  document.addEventListener('paste', e => { if (isExamActive) e.preventDefault(); });
+  document.addEventListener('keydown', function(e) {
+    if (isExamActive && (
+       e.key === 'F12' || 
+       (e.ctrlKey && e.shiftKey && e.key === 'I') || 
+       (e.ctrlKey && e.key === 'u') || 
+       (e.ctrlKey && e.key === 's')
+    )) {
+      e.preventDefault();
+    }
+  });
+
+  function forceLock() {
+    clearInterval(timerInterval);
+    isExamActive = false;
+    document.getElementById('examArea').innerHTML = `
+      <div class="system-msg">
+        <h2 style="color: #dc3545;"><i class="fa-solid fa-user-slash"></i> Akses Ujian Dibatalkan</h2>
+        <p>Anda telah dikeluarkan dari ujian karena terdeteksi berpindah tab/layar secara berulang kali.</p>
+        <p>Silakan hubungi pengawas/guru ujian Anda.</p>
+      </div>
+    `;
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    }
+  }
+</script>
+
+</body>
+</html>
